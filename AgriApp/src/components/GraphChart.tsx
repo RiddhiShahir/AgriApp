@@ -11,7 +11,7 @@ interface GraphChartProps {
 
 export default function GraphChart({ filters }: GraphChartProps) {
   // Simulate dynamic data based on filters
-  const baseData = [20, 45, 28, 80, 99, 43];
+  const baseData = [10, 15, 12, 20, 18, 16];
   const adjusted = filters?.mandi || filters?.crop ? baseData.map((v) => v + 10) : baseData;
 
   const data = {

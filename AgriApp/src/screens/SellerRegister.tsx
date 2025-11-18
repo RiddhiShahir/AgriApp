@@ -1,14 +1,48 @@
-import React from 'react';
-import {Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React,{ useState } from 'react';
+import {Text, TextInput, TouchableOpacity, StyleSheet, Alert,View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../../App';
+import { addRole } from '.././utils/storage'; 
 
 export default function SellerRegister() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const handleSubmit = () => {
+  const [sellername, setSellerName] = useState('');
+  const [businessname, setBusinessName] = useState('');
+  const [primarycrop, setPrimaryCrop] = useState('');
+  const [location, setLocation] = useState('');
+
+    const handleSubmit = async () => {
+
+    if (!sellername || !businessname || !primarycrop || !location) {
+
+      return Alert.alert('Missing Data', 'Please fill all fields.');
+
+    }
+
+      // Save role with phone and record role registration
+
+    const phone = await AsyncStorage.getItem('LOGGED_IN_USER') || 'unknown';
+
+    if (!phone) {
+      return Alert.alert('Error', 'Phone number not found in session');
+    }
+
+    if (phone) await addRole(phone, "seller");  
+
+    await AsyncStorage.setItem('LOGGED_IN_ROLE', 'seller');
+
+    // Save seller profile
+
+    //await AsyncStorage.setItem('sellerProfile', JSON.stringify({ sellername, businessname,location, primarycrop, phone }));
+        await AsyncStorage.setItem(
+      `SELLER_PROFILE_${phone}`,
+      JSON.stringify({ sellername, businessname, primarycrop, location })
+    );
+  
     Alert.alert(
       'Success',
       'Seller registration successful !',
@@ -24,16 +58,16 @@ export default function SellerRegister() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Seller Registration</Text>
-      <TextInput placeholder="Seller Name" style={styles.input} />
-      <TextInput placeholder="Business Name" style={styles.input} />
-      <TextInput placeholder="Primary Crop" style={styles.input} />
-      <TextInput placeholder="Location" style={styles.input} />
+      <TextInput placeholder="Seller Name" style={styles.input}value={sellername} onChangeText={setSellerName} />
+      <TextInput placeholder="Business Name" style={styles.input}value={businessname} onChangeText={setBusinessName} />
+      <TextInput placeholder="Primary Crop" style={styles.input}value={primarycrop} onChangeText={setPrimaryCrop} />
+      <TextInput placeholder="Location" style={styles.input}value={location} onChangeText={setLocation} />
       <TouchableOpacity style={styles.btn} onPress={handleSubmit}>
       <Text style={styles.btnText}>Register</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
-}
+    }
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
@@ -42,4 +76,3 @@ const styles = StyleSheet.create({
   btn: { backgroundColor: '#2b6cb0', padding: 12, borderRadius: 8, alignItems: 'center' },
   btnText: { color: '#fff', fontWeight: '700' },
 });
-
